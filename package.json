@@ -1,0 +1,14 @@
+{
+  "name": "automatonic",
+  "version": "0.0.1",
+  "license": "MIT",
+  "main": "index.js",
+  "description": "Browser automation as an electron library",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/evs-chris/automatonic.git"
+  },
+  "engines": {
+    "electron": "^1.4.0"
+  }
+}
