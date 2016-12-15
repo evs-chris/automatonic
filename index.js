@@ -74,7 +74,7 @@ class Browser {
     });
   }
 
-  wait(selector, timeout) {
+  waitFor(selector, timeout) {
     return queue(this, () => {
       if (typeof selector === 'number') return delay(selector);
       else return waitFor(this, selector, timeout);
