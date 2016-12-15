@@ -41,8 +41,11 @@ All of the API methods return a Promise, and all of them use an internal queue t
 * __type(selector, string[, options object])__
   > Find an element with the given selector, focus it, and then pass each character from the string into the target element. Each character will trigger `keydown`, `keypress`, update the value, `input`, and `keyup`. Once all of the characters are added, a `change` event will be triggered. This will wait up to 1s (default, change with the `timeout` option) for the element to appear. Specifying `append: true` will not empty the target input before sending characters.
 
-* __waitFor(selector, timeout = 5000)__
+* __wait(selector, timeout = 5000)__
   > Wait up to `timeout` milliseconds for an element matching `selector` to appear on the page.
+
+* __wait(timeout = 1000)__
+  > Wait for `timeout` milliseconds before continuing.
 
 * __checkFor(selector)__
   > Immediately check to see if an element matching `selector` exists.
@@ -79,7 +82,7 @@ run(function*() {
   I.click('button[name=btnG]');
 
   // wait for a result and grab its title
-  I.waitFor('h3.r a');
+  I.wait('h3.r a');
   const first = yield I.execute(function() {
     return document.querySelector('h3.r a').innerText;
   });
