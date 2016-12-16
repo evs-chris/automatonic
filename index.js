@@ -48,8 +48,20 @@ class Browser {
   }
 
   goto(url, options) {
-    return queue(this, done => {
-      this.browser.webContents.once('did-finish-load', done);
+    return queue(this, (done, err) => {
+      let sent = false;
+      this.browser.webContents.once('did-finish-load', () => {
+        if (!sent) {
+          sent = true;
+          done();
+        }
+      });
+      this.browser.webContents.once('did-fail-load', (event, errorCode, desc, url) => {
+        if (!sent) {
+          sent = true;
+          err(`Failed to navigate to '${url}' (${desc})`);
+        }
+      });
       this.browser.loadURL(url, options);
     });
   }
