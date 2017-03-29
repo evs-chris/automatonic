@@ -5,7 +5,7 @@ if (!process.versions.electron) {
 
 const { BrowserWindow } = require('electron');
 const { whenReady, digest, queue, execute, waitFor, waitForQueue } = require('./plumbing');
-const { noop, run, delay } = require('./utils');
+const { noop, run, delay, tmpFileSync } = require('./utils');
 
 
 const browsers = [];
@@ -16,7 +16,16 @@ class Browser {
     this.typingInterval = options.typingInterval || 50;
     browsers.push(this);
     this._queue.push(null);
-    options.webPreferences = { nodeIntegration: false };
+
+    if (!options.webPreferences) options.webPreferences = { nodeIntegration: false };
+    else if (!('nodeIntegration' in options.webPreferences)) options.webPreferences.nodeIntegration = false;
+
+    let script = '';
+    if (typeof options.exposeElectronAs === 'string') script = `window[${JSON.stringify(options.exposeElectronAs)}] = require('electron');\n`;
+    if (typeof options.preloadScript === 'string') script += options.preloadScript;
+    if (script) {
+      options.webPreferences.preload = tmpFileSync(script);
+    }
 
     whenReady(() => {
       this.browser = new BrowserWindow(options);

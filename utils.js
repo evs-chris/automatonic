@@ -1,3 +1,7 @@
+const os = require('os');
+const path = require('path');
+const fs = require('fs');
+
 function noop() {}
 
 function delay(time) {
@@ -43,6 +47,31 @@ function run(generator, ...args) {
   });
 }
 
+const tmpFileSync = (function() {
+  const files = [];
+  let count = 0;
+
+  function tmpFileSync(data, opts) {
+    const name = path.join(os.tmpdir(), `automatonic_${process.pid}_${count++}`);
+    files.push(name);
+    fs.writeFileSync(name, data, opts);
+    return name;
+  }
+
+  process.on('exit', () => {
+    files.forEach(f => {
+      try {
+        fs.unlinkSync(f);
+      } catch (e) {
+        // oh well?
+      }
+    });
+  });
+
+  return tmpFileSync;
+})();
+
 module.exports.noop = noop;
 module.exports.delay = delay;
 module.exports.run = run;
+module.exports.tmpFileSync = tmpFileSync;

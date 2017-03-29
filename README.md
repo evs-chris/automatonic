@@ -1,14 +1,14 @@
 # Automatonic
 
-automatonic is a library that, for now, is meant to be used within [Electron](http://electron.atom.io) app for browser automation. Electron provides pretty good APIs for doing automation, but they're not particularly convenient for things like automated testing. There _are_ things like [Nightmare.js](http://www.nightmarejs.org) the provide an abstraction on top of Electron, and this is largely inspired by those.
+automatonic is a library that, for now, is meant to be used within an [Electron](http://electron.atom.io) app for browser automation. Electron provides pretty good APIs for doing automation, but they're not particularly convenient for things like automated testing. There _are_ things like [Nightmare.js](http://www.nightmarejs.org) the provide an abstraction on top of Electron, and this is largely inspired by those.
 
 ## Why not just use Nightmare.js?
 
-Well, there are a few reasons:
+Reasons. Here are a few:
 
-1. The page I was trying to test would cause Nightmare.js to freeze, but the same test when run manually in Electron or PhantomJS worked fine.
-2. You can't use Nightmare.js from within an Electron app.
-3. You can't test multi-session interaction (multiple browsers, like chat) because you only get access to one BrowserWindow.
+* The page I was trying to test would cause Nightmare.js to freeze, but the same test when run manually in Electron or PhantomJS worked fine.
+* You can't use Nightmare.js from within an Electron app.
+* You can't test multi-session interaction (multiple browsers, like chat) because you only get access to one BrowserWindow.
 
 ## API
 
@@ -17,10 +17,15 @@ All of the API methods return a Promise, and all of them use an internal queue t
 ### Browser
 
 * __constructor([options object])__ or `Browser.new([options object])`
-  > The options object is passed straight through to Electron's `BrowserWindow`.
+  > The options object is passed straight through to Electron's `BrowserWindow`. If not specified, `webPreferences.nodeIntegration` is set to `false` because it can interfere with module loaders and has the tiny risk of having a third party script completely own your machine.
+
   > The automatonic specific options are:
   * __pollInterval__: number of milliseconds between element checks when waiting for an element to appear. Default is 200.
   * __typingInterval__: number of milliseconds between characters when typing into an input. Default is 50.
+  * exposeElectronAs: `string` variable name to expose the electron module to the page e.g. `window.${exposeElectronAs} = require('electron')`. This is implemented with a preload script, so it works even if `nodeIntegration` is disabled (the default).
+  * preloadScript: `string` of extra script that gets added to any generated preload script to be handed to electron.
+
+  > Any generated preload scripts are created as temporary files that are cleaned up when the main process exits.
 
 #### Properties
 
