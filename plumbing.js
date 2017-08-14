@@ -7,8 +7,9 @@ let whenReady = (function() {
   let ready = false;
 
   const proxy = function(fn) {
-    if (!ready && fn) queue.push(fn);
-    else if (ready) {
+    if (fn) queue.push(fn);
+
+    if (ready) {
       ready = false;
       let next;
       while (next = queue.shift()) {
