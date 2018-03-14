@@ -87,7 +87,7 @@ run(function*() {
   I.click('button[name=btnG]');
 
   // wait for a result and grab its title
-  I.wait('h3.r a');
+  I.waitFor('h3.r a');
   const first = yield I.execute(function() {
     return document.querySelector('h3.r a').innerText;
   });
