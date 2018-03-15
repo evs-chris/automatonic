@@ -131,13 +131,14 @@ class Browser {
         const el = document.querySelector(selector);
         if (!el) throw new Error(`type: No element matches '${selector}'`);
         el.focus();
+        el.blur();
         if (!options.append) el.value = '';
         function letter(a) {
           const keyCode = a.charCodeAt(0);
           el.dispatchEvent(new KeyboardEvent('keydown', { keyCode }));
           el.dispatchEvent(new KeyboardEvent('keypress', { keyCode }));
           el.value += a;
-          el.dispatchEvent(new Event('input'));
+          el.dispatchEvent(new Event('input', { bubbles: true }));
           el.dispatchEvent(new KeyboardEvent('keyup', { keyCode }));
         }
         return new Promise(ok => {
