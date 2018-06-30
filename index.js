@@ -131,13 +131,14 @@ class Browser {
         const el = document.querySelector(selector);
         if (!el) throw new Error(`type: No element matches '${selector}'`);
         el.focus();
+        el.blur();
         if (!options.append) el.value = '';
         function letter(a) {
           const keyCode = a.charCodeAt(0);
           el.dispatchEvent(new KeyboardEvent('keydown', { keyCode }));
           el.dispatchEvent(new KeyboardEvent('keypress', { keyCode }));
           el.value += a;
-          el.dispatchEvent(new Event('input'));
+          el.dispatchEvent(new Event('input', { bubbles: true }));
           el.dispatchEvent(new KeyboardEvent('keyup', { keyCode }));
         }
         return new Promise(ok => {
@@ -157,6 +158,61 @@ class Browser {
       }, selector, str, options);
     }, options.timeout);
   }
+
+    upload(selector, pathsToUpload, options = {}) {
+        return queue(this, (done, err) => {
+
+            const win = this.browser;
+
+            try {
+                if(win.webContents.debugger.isAttached()) {
+                    win.webContents.debugger.detach();
+                }
+                //attach the debugger
+                //NOTE: this will fail if devtools is open
+                win.webContents.debugger.attach('1.1');
+            } catch (e) {
+                throw new Error(e.message);
+            }
+
+            try {
+                return new Promise(ok => {
+                    win.webContents.debugger.sendCommand('DOM.getDocument', {}, function(err, domDocument) {
+
+                        if (Object.keys(err) .length > 0) {
+                            throw new Error(err.message);
+                        }
+
+                        win.webContents.debugger.sendCommand('DOM.querySelector', {
+                            nodeId: domDocument.root.nodeId,
+                            selector: selector
+                        }, function(err, queryResult) {
+                            //HACK: chromium errors appear to be unpopulated objects?
+                            if (Object.keys(err) .length > 0) {
+                                throw new Error(err.message);
+                            }
+
+                            win.webContents.debugger.sendCommand('DOM.setFileInputFiles', {
+                                nodeId: queryResult.nodeId,
+                                files: pathsToUpload
+                            }, function(err, setFileResult) {
+                                if (Object.keys(err).length > 0) {
+                                    throw new Error(err.message);
+                                }
+                                win.webContents.debugger.detach();
+                                ok();
+                            });
+
+
+                        });
+                    });
+                });
+            } catch (e) {
+                throw new Error(e.message);
+            }
+
+        });
+    }
 
   checkFor(selector) {
     return this.execute(selector => {
